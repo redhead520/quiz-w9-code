@@ -32,7 +32,7 @@
 ### 数据集
 - 生成的fcn_train.record,fcn_val.record与tinymind AI100上的数据集,大小上有0.几兆的区别,训练时未发现异常.
 - 数据集地址:https://www.tinymind.com/jxhuanghf/datasets/quiz-fcn
-
+![结果图](result_dataset.jpg)
 
 ### 模型训练完成：
 训练结果
@@ -44,24 +44,23 @@
 
 ![结果图](result_eval_out.jpg)
 
-原图 https://www.tinymind.com/executions/6oradjil/output/eval/val_1000_img.jpg
+原图 
 
-![结果图](result_1000_img.jpg)
+![结果图](result_val_1000_img.jpg)
 
-标签 https://www.tinymind.com/executions/6oradjil/output/eval/val_1000_annotation.jpg
+标签
 
-![结果图](result_1000_annotation.jpg)
+![结果图](val_1000_annotation.jpg)
 
-预测 https://www.tinymind.com/executions/6oradjil/output/eval/val_1000_prediction.jpg
+预测
 
-![预测](result_1000_prediction.jpg)
+![预测](result_val_1000_prediction.jpg)
 
-CRF之后的预测 https://www.tinymind.com/executions/6oradjil/output/eval/val_1000_prediction_crfed.jpg
-
-![预测](result_1000_prediction_crfed.jpg)
+CRF之后的预测
+![预测](result_val_1000_prediction_crfed.jpg)
 
 
 ### 心得体会：
 提供一份文档，描述自己的8Xfcn实现，需要有对关键代码的解释。描述自己对fcn的理解。
-### 参考内容
+
 
