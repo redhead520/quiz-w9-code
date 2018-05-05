@@ -1,1 +1,17 @@
 data/
+.idea
+.idea/Trade4THS.iml
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
+api_test.pyc
+api_test.spec
+app.spec
+build/
+dist/
+queueTask.pyc
+thsAPI.pyc
+*.pyc
+*.spec
+*.db
