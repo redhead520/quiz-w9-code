@@ -96,7 +96,7 @@ with tf.variable_scope('vgg_16/fc8'):
                                  weights_initializer=tf.zeros_initializer,
                                  scope='conv_pool4')
 
-# Perform the upsampling
+# Perform the upsampling 2X
 upsample_filter_np_x2_1 = bilinear_upsample_weights(2,  # upsample_factor,
                                                   number_of_classes)
 
@@ -110,6 +110,7 @@ upsampled_logits = tf.nn.conv2d_transpose(logits, upsample_filter_tensor_x2_1,
 upsampled_logits = upsampled_logits + aux_logits_16s
 
 if upsample_factor == 16:
+    # Perform the upsampling 16X
     upsample_filter_np_x16 = bilinear_upsample_weights(upsample_factor,
                                                        number_of_classes)
 
@@ -118,15 +119,14 @@ if upsample_factor == 16:
                                               output_shape=upsampled_logits_shape,
                                               strides=[1, upsample_factor, upsample_factor, 1],
                                               padding='SAME')
-elif upsample_factor == 8:
-    print('fnc 8x =====> upsample_factor 8')
+elif upsample_factor == 8:  
     pool3_feature = end_points['vgg_16/pool3']
     with tf.variable_scope('vgg_16/fc8'):
         aux_logits_16s = slim.conv2d(pool3_feature, number_of_classes, [1, 1],
                                  activation_fn=None,
                                  weights_initializer=tf.zeros_initializer,
                                  scope='conv_pool3')
-    # Perform the upsampling
+    # Perform the upsampling 2X
     upsample_filter_np_x2_2 = bilinear_upsample_weights(2,  # upsample_factor,
                                                       number_of_classes)
 
@@ -138,7 +138,7 @@ elif upsample_factor == 8:
                                               padding='SAME')
 
     upsampled_logits = upsampled_logits + aux_logits_16s
-
+    # Perform the upsampling 8X
     upsample_filter_np_x8 = bilinear_upsample_weights(upsample_factor,
                                                        number_of_classes)
 
