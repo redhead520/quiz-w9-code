@@ -62,14 +62,21 @@ CRF之后的预测
 
 
 ### 心得体会：
-提供一份文档，描述自己的8Xfcn实现，需要有对关键代码的解释。描述自己对fcn的理解。
 
 - fcn模型被称为全卷积网络，可以接受任意大小的输入,里面全部是由卷积构成的
 - 对于任何一张输入图片，由于卷积层和池化层的不断作用，得到的输出形状会越来越小，但是通道数会越来越大,到达4096后,通过全连接,输出的通道数等于类别数目.
 - fcn-32s 就是直接将最后的结果通过转置卷积扩大 32 倍进行输出，得到与原图一样大小的矩阵,再与进行过onehot编码后的label进行计算交叉熵作损失
 - fcn-16x 就是联合前面一次vgg_16/pool4的结果进行 16 倍的输出，
-- fcn-8x 就是联合前面两次(vgg_16/pool4, vgg_16/pool4)的结果进行 8 倍的输出
-- 
+- fcn-8x 就是联合前面两次(vgg_16/pool4, vgg_16/pool3)的结果进行 8 倍的输出
+- 代码补充部分
+```
+在fcn-16x基础上,只需要在16倍上采样之前,接着联合vgg_16/pool3 的结果,再进行8倍的上采样就行了.
+```
+- 备注:
+```
+联合之前,将结果2倍上采样,使其空间大小与前一次池化的结果的空间大小一样, 
+对前一次池化的结果得进行卷积1*1的卷积,使其通道上与类别数目一致.
+```
 - 概念:
 ```
 转置卷积(上采样):tf函数tf.nn.conv2d_transpose, 卷积的逆过程
@@ -77,8 +84,19 @@ CRF之后的预测
 
 ```
 ```python
+upsampled_logits = upsampled_logits + aux_logits_16s
+    # fcn 16x
 if upsample_factor == 16:
-    pass......
+    # Perform the upsampling 16X
+    upsample_filter_np_x16 = bilinear_upsample_weights(upsample_factor,
+                                                       number_of_classes)
+
+    upsample_filter_tensor_x16 = tf.Variable(upsample_filter_np_x16, name='vgg_16/fc8/t_conv_x16')
+    upsampled_logits = tf.nn.conv2d_transpose(upsampled_logits, upsample_filter_tensor_x16,
+                                              output_shape=upsampled_logits_shape,
+                                              strides=[1, upsample_factor, upsample_factor, 1],
+                                              padding='SAME')
+    # fcn 8x
 elif upsample_factor == 8:  
     pool3_feature = end_points['vgg_16/pool3']
     with tf.variable_scope('vgg_16/fc8'):
@@ -89,24 +107,24 @@ elif upsample_factor == 8:
     # Perform the upsampling 2X
     upsample_filter_np_x2_2 = bilinear_upsample_weights(2,  # upsample_factor,
                                                       number_of_classes)
-
+    # bilinear kernel
     upsample_filter_tensor_x2_2 = tf.Variable(upsample_filter_np_x2_2, name='vgg_16/fc8/t_conv_x2_2')
-
+    # transpose convolution 
     upsampled_logits = tf.nn.conv2d_transpose(upsampled_logits, upsample_filter_tensor_x2_2,
                                               output_shape=tf.shape(aux_logits_16s),
                                               strides=[1, 2, 2, 1],
                                               padding='SAME')
 
     upsampled_logits = upsampled_logits + aux_logits_16s
-    # Perform the upsampling 8X
+    # Perform the upsampling 8X   
     upsample_filter_np_x8 = bilinear_upsample_weights(upsample_factor,
                                                        number_of_classes)
-
+    # bilinear kernel
     upsample_filter_tensor_x8 = tf.Variable(upsample_filter_np_x8, name='vgg_16/fc8/t_conv_x8')
+    # transpose convolution 
     upsampled_logits = tf.nn.conv2d_transpose(upsampled_logits, upsample_filter_tensor_x8,
                                               output_shape=upsampled_logits_shape,
                                               strides=[1, upsample_factor, upsample_factor, 1],
                                               padding='SAME')
-
 
 ```
