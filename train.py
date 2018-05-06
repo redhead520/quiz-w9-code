@@ -108,7 +108,7 @@ upsampled_logits = tf.nn.conv2d_transpose(logits, upsample_filter_tensor_x2_1,
                                           padding='SAME')
 
 upsampled_logits = upsampled_logits + aux_logits_16s
-
+    # fcn 16x
 if upsample_factor == 16:
     # Perform the upsampling 16X
     upsample_filter_np_x16 = bilinear_upsample_weights(upsample_factor,
@@ -119,6 +119,7 @@ if upsample_factor == 16:
                                               output_shape=upsampled_logits_shape,
                                               strides=[1, upsample_factor, upsample_factor, 1],
                                               padding='SAME')
+    # fcn 8x
 elif upsample_factor == 8:  
     pool3_feature = end_points['vgg_16/pool3']
     with tf.variable_scope('vgg_16/fc8'):
@@ -129,20 +130,21 @@ elif upsample_factor == 8:
     # Perform the upsampling 2X
     upsample_filter_np_x2_2 = bilinear_upsample_weights(2,  # upsample_factor,
                                                       number_of_classes)
-
+    # bilinear kernel
     upsample_filter_tensor_x2_2 = tf.Variable(upsample_filter_np_x2_2, name='vgg_16/fc8/t_conv_x2_2')
-
+    # transpose convolution 
     upsampled_logits = tf.nn.conv2d_transpose(upsampled_logits, upsample_filter_tensor_x2_2,
                                               output_shape=tf.shape(aux_logits_16s),
                                               strides=[1, 2, 2, 1],
                                               padding='SAME')
 
     upsampled_logits = upsampled_logits + aux_logits_16s
-    # Perform the upsampling 8X
+    # Perform the upsampling 8X   
     upsample_filter_np_x8 = bilinear_upsample_weights(upsample_factor,
                                                        number_of_classes)
-
+    # bilinear kernel
     upsample_filter_tensor_x8 = tf.Variable(upsample_filter_np_x8, name='vgg_16/fc8/t_conv_x8')
+    # transpose convolution 
     upsampled_logits = tf.nn.conv2d_transpose(upsampled_logits, upsample_filter_tensor_x8,
                                               output_shape=upsampled_logits_shape,
                                               strides=[1, upsample_factor, upsample_factor, 1],
